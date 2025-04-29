@@ -14,7 +14,6 @@ logs/
 *.log
 
 # Database dumps / temp files
-*.sql
 *.dump
 
 # IDE / Editor folders
