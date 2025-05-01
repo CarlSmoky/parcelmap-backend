@@ -4,9 +4,15 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const sourceDb = new Pool({
-  connectionString: process.env.SOURCE_DATABASE_URL
+  connectionString: process.env.SOURCE_DATABASE_URL,
+  max: 10,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000
 });
 
 export const updateDb = new Pool({
-  connectionString: process.env.UPDATE_DATABASE_URL
+  connectionString: process.env.UPDATE_DATABASE_URL,
+  max: 10,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000
 });
