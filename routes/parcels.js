@@ -27,6 +27,8 @@ router.get('/parcels', async (req, res, next) => {
       zoning_typ: updateMap.get(parcel.id) || parcel.zoning_typ
     }));
 
+    // TODO: remove 
+    // throw new Error('Simulated error');
     res.json(mergedParcels);
   } catch (err) {
     console.error('Error fetching parcels or updates:', err);
@@ -39,13 +41,23 @@ router.get('/parcels', async (req, res, next) => {
 
 router.post('/parcels', async (req, res, next) => {
   const { targetParcels, newZoningType } = req.body;
-  if (!targetParcels || !newZoningType) {
-    return res.status(400).json({ error: 'Parcel ID and zoning type are required' });
+
+  if (!Array.isArray(targetParcels) || targetParcels.length === 0 || !targetParcels.every(id => Number.isInteger(id))) {
+    return res.status(400).json({ error: 'An array of parcel IDs is required' });
+  }
+
+  if (typeof newZoningType !== 'string' || newZoningType.trim() === '') {
+    return res.status(400).json({ error: 'A valid zoning type is required' });
   }
 
   let updateClient;
   try {
     updateClient = await updateDb.connect();
+
+    await updateClient.query('BEGIN');
+
+    // TODO: remove -> Simulate an error after starting the transaction
+    // throw new Error('Simulated error for rollback testing');
 
     const columnsPerRow = 2;
     const values = [];
@@ -58,11 +70,26 @@ router.post('/parcels', async (req, res, next) => {
       })
       .join(", ");
 
-    const result = await updateClient.query(queries.zoningTypUpdates(placeholders), values);
+    const query = queries.zoningTypUpdates(placeholders);
+
+    const result = await updateClient.query(query, values);
+
+    await updateClient.query('COMMIT');
 
     res.status(201).json(result.rows);
   } catch (err) {
     console.error('Error posting zoning type update:', err);
+
+    // Rollback the transaction on error
+    if (updateClient) {
+      try {
+        await updateClient.query('ROLLBACK');
+        // TODO: remove
+        // throw new Error('Simulated rollback failure');
+      } catch (rollbackErr) {
+        console.error('Error rolling back transaction:', rollbackErr.message);
+      }
+    }
     next(err);
   } finally {
     if (updateClient) updateClient.release();
