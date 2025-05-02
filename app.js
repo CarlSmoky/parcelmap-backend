@@ -12,7 +12,6 @@ app.use('/api', parcelsRouter);
 // Global error-handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  // console.log('Global error-handling middleware executed');
 
   const response = {
     error: err.message || 'Internal Server Error'
