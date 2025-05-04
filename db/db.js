@@ -14,7 +14,7 @@ export const sourceDb = new Pool({
 
 export const updateDb = new Pool({
   connectionString: isProduction
-    ? process.env.PROD_UPDATE_DATABASE_URL
+    ? process.env.DATABASE_URL
     : process.env.DEV_UPDATE_DATABASE_URL,
   max: 10,
   idleTimeoutMillis: 30000,

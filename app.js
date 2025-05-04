@@ -9,6 +9,10 @@ app.use(express.json());
 
 app.use('/api', parcelsRouter);
 
+app.get('/', (req, res) => {
+  res.send("This is parcel map back-end");
+});
+
 // Global error-handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
